@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
@@ -34,9 +34,10 @@
               <span class="field-label">Font family</span>
               <select id="fontSelect">
                 <optgroup label="Google">
-                  <option value='"Playfair Display", serif' selected>
-                    Playfair Display
+                  <option value='"Cormorant Garamond", serif' selected>
+                    Cormorant Garamond
                   </option>
+                  <option value='"Playfair Display", serif'>Playfair Display</option>
                   <option value='"Merriweather", serif'>Merriweather</option>
                 </optgroup>
                 <optgroup label="Sans Serif">
@@ -158,10 +159,10 @@
                   type="range"
                   min="1.05"
                   max="1.6"
-                  value="1.25"
+                  value="1.1"
                   step="0.05"
                 />
-                <span id="lineHeightValue" class="range-value">1.25x</span>
+                <span id="lineHeightValue" class="range-value">1.1x</span>
               </div>
             </label>
             <label class="field">
@@ -170,19 +171,19 @@
                 <input
                   id="spacingRange"
                   type="range"
-                  min="0"
+                  min="-3"
                   max="6"
-                  value="0"
+                  value="-0.5"
                   step="0.5"
                 />
-                <span id="spacingValue" class="range-value">0px</span>
+                <span id="spacingValue" class="range-value">-0.5px</span>
               </div>
             </label>
             <label class="field">
               <span class="field-label">Text align</span>
               <select id="alignSelect">
-                <option value="center" selected>Center</option>
-                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="left" selected>Left</option>
                 <option value="right">Right</option>
               </select>
             </label>
@@ -190,11 +191,18 @@
               <span class="field-label">Text color</span>
               <div class="swatches" role="group" aria-label="Text color">
                 <button
-                  class="swatch is-active"
+                  class="swatch"
                   type="button"
                   data-color="#000000"
                   style="--swatch: #000000"
                   aria-label="Black"
+                ></button>
+                <button
+                  class="swatch is-active"
+                  type="button"
+                  data-color="#0b3d1a"
+                  style="--swatch: #0b3d1a"
+                  aria-label="Deep green"
                 ></button>
                 <button
                   class="swatch"
@@ -247,6 +255,74 @@
                 ></button>
               </div>
             </label>
+            <label class="field wide">
+              <span class="field-label">Background color</span>
+              <div class="swatches" role="group" aria-label="Background color">
+                <button
+                  class="swatch bg-swatch is-active"
+                  type="button"
+                  data-color="#ffffff"
+                  style="--swatch: #ffffff"
+                  aria-label="White"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#008000"
+                  style="--swatch: #008000"
+                  aria-label="Green"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#006400"
+                  style="--swatch: #006400"
+                  aria-label="Dark green"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#0b3d1a"
+                  style="--swatch: #0b3d1a"
+                  aria-label="Forest"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#1f5a4a"
+                  style="--swatch: #1f5a4a"
+                  aria-label="Evergreen"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#0f172a"
+                  style="--swatch: #0f172a"
+                  aria-label="Deep navy"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#111111"
+                  style="--swatch: #111111"
+                  aria-label="Black"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#f5f1e8"
+                  style="--swatch: #f5f1e8"
+                  aria-label="Ivory"
+                ></button>
+                <button
+                  class="swatch bg-swatch"
+                  type="button"
+                  data-color="#f6c453"
+                  style="--swatch: #f6c453"
+                  aria-label="Amber"
+                ></button>
+              </div>
+            </label>
             <label class="field">
               <span class="field-label">Font weight</span>
               <div class="toggle">
@@ -273,6 +349,42 @@
               <div class="toggle">
                 <input id="underlineToggle" type="checkbox" />
                 <span>Underline quote</span>
+              </div>
+            </label>
+            <label class="field">
+              <span class="field-label">Footer align</span>
+              <select id="footerAlignSelect">
+                <option value="center">Center</option>
+                <option value="left">Left</option>
+                <option value="right" selected>Right</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Footer X</span>
+              <div class="range-row">
+                <input
+                  id="footerXRange"
+                  type="range"
+                  min="0"
+                  max="1080"
+                  value="1000"
+                  step="10"
+                />
+                <span id="footerXValue" class="range-value">1000px</span>
+              </div>
+            </label>
+            <label class="field">
+              <span class="field-label">Footer Y</span>
+              <div class="range-row">
+                <input
+                  id="footerYRange"
+                  type="range"
+                  min="0"
+                  max="1350"
+                  value="1290"
+                  step="10"
+                />
+                <span id="footerYValue" class="range-value">1290px</span>
               </div>
             </label>
           </div>

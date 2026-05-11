@@ -16,7 +16,17 @@ const spacingValue = document.getElementById("spacingValue");
 const alignSelect = document.getElementById("alignSelect");
 const capsToggle = document.getElementById("capsToggle");
 const underlineToggle = document.getElementById("underlineToggle");
-const colorButtons = Array.from(document.querySelectorAll(".swatch"));
+const footerAlignSelect = document.getElementById("footerAlignSelect");
+const footerXRange = document.getElementById("footerXRange");
+const footerXValue = document.getElementById("footerXValue");
+const footerYRange = document.getElementById("footerYRange");
+const footerYValue = document.getElementById("footerYValue");
+const textColorButtons = Array.from(
+  document.querySelectorAll(".swatches[aria-label='Text color'] .swatch")
+);
+const bgColorButtons = Array.from(
+  document.querySelectorAll(".swatches[aria-label='Background color'] .swatch")
+);
 
 const CANVAS_WIDTH = 1080;
 const CANVAS_HEIGHT = 1350;
@@ -26,24 +36,28 @@ const FOOTER_TEXT = "4revatayari";
 
 // Style tuning knobs (adjust freely).
 const STYLE = {
-  background: "#008000",
-  textColor: "#000000",
-  fontFamily: '"Playfair Display", serif',
+  background: "#ffffff",
+  textColor: "#0b3d1a",
+  fontFamily: '"Cormorant Garamond", serif',
   quoteFontSize: 72,
   quoteMinFontSize: 40,
-  quoteFontWeight: "400",
+  quoteFontWeight: "600",
+  quoteFontWeightNormal: "600",
+  quoteFontWeightBold: "700",
   quoteFontStyle: "normal",
-  quoteLineHeight: 1.25,
-  quoteLetterSpacing: 0,
+  quoteLineHeight: 1.1,
+  quoteLetterSpacing: -0.5,
   quoteAllCaps: false,
   quoteUnderline: false,
-  textAlign: "center",
+  textAlign: "left",
   quotePaddingX: 120,
   quotePaddingTop: 140,
   quotePaddingBottom: 140,
   footerFontSize: 34,
   footerFontWeight: "600",
-  footerBottom: 60,
+  footerAlign: "right",
+  footerX: 1000,
+  footerY: 1290,
 };
 
 canvas.width = CANVAS_WIDTH;
@@ -82,7 +96,7 @@ function getLineStartX(lineWidth, drawX) {
 function measureTextWithSpacing(text, fontSize) {
   ctx.font = getQuoteFont(fontSize);
   const baseWidth = ctx.measureText(text).width;
-  if (STYLE.quoteLetterSpacing <= 0 || text.length <= 1) {
+  if (text.length <= 1) {
     return baseWidth;
   }
   return baseWidth + (text.length - 1) * STYLE.quoteLetterSpacing;
@@ -115,8 +129,14 @@ function wrapText(text, maxWidth, fontSize) {
 function layoutQuote(text) {
   const maxWidth = CANVAS_WIDTH - STYLE.quotePaddingX * 2;
   const availableTop = STYLE.quotePaddingTop;
-  const availableBottom =
-    CANVAS_HEIGHT - STYLE.footerBottom - STYLE.footerFontSize - STYLE.quotePaddingBottom;
+  const footerReserveTop = STYLE.footerY - STYLE.footerFontSize;
+  let availableBottom = Math.min(
+    CANVAS_HEIGHT - STYLE.quotePaddingBottom,
+    footerReserveTop - STYLE.quotePaddingBottom
+  );
+  if (availableBottom < availableTop + 1) {
+    availableBottom = availableTop + 1;
+  }
   const availableHeight = availableBottom - availableTop;
 
   let fontSize = STYLE.quoteFontSize;
@@ -164,7 +184,7 @@ function drawCanvas(text) {
     const lineWidth = measureTextWithSpacing(line, layout.fontSize);
     const startX = getLineStartX(lineWidth, drawX);
 
-    if (STYLE.quoteLetterSpacing <= 0) {
+    if (STYLE.quoteLetterSpacing === 0) {
       ctx.fillText(line, drawX, y);
     } else {
       // Manual letter spacing for crisp tracking control.
@@ -190,29 +210,44 @@ function drawCanvas(text) {
 
   // Footer.
   ctx.font = `${STYLE.footerFontWeight} ${STYLE.footerFontSize}px ${STYLE.fontFamily}`;
+  ctx.textAlign = STYLE.footerAlign;
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(FOOTER_TEXT, CANVAS_WIDTH / 2, CANVAS_HEIGHT - STYLE.footerBottom);
+  ctx.fillText(FOOTER_TEXT, STYLE.footerX, STYLE.footerY);
 }
 
 function updateStyleFromControls() {
   STYLE.fontFamily = fontSelect.value;
   STYLE.quoteFontSize = Number(sizeRange.value);
   STYLE.quoteMinFontSize = Math.max(32, Math.round(STYLE.quoteFontSize * 0.6));
-  STYLE.quoteFontWeight = boldToggle.checked ? "700" : "400";
+  STYLE.quoteFontWeight = boldToggle.checked
+    ? STYLE.quoteFontWeightBold
+    : STYLE.quoteFontWeightNormal;
   STYLE.quoteFontStyle = italicToggle.checked ? "italic" : "normal";
   STYLE.quoteLineHeight = Number(lineHeightRange.value);
   STYLE.quoteLetterSpacing = Number(spacingRange.value);
   STYLE.quoteAllCaps = capsToggle.checked;
   STYLE.quoteUnderline = underlineToggle.checked;
   STYLE.textAlign = alignSelect.value;
+  STYLE.footerAlign = footerAlignSelect.value;
+  STYLE.footerX = Number(footerXRange.value);
+  STYLE.footerY = Number(footerYRange.value);
   sizeValue.textContent = `${STYLE.quoteFontSize}px`;
   lineHeightValue.textContent = formatValue(STYLE.quoteLineHeight, 2, "x");
   spacingValue.textContent = formatValue(STYLE.quoteLetterSpacing, 1, "px");
+  footerXValue.textContent = `${STYLE.footerX}px`;
+  footerYValue.textContent = `${STYLE.footerY}px`;
 }
 
-function setActiveSwatch(color) {
+function setActiveTextColor(color) {
   STYLE.textColor = color;
-  colorButtons.forEach((button) => {
+  textColorButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.color === color);
+  });
+}
+
+function setActiveBackground(color) {
+  STYLE.background = color;
+  bgColorButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.color === color);
   });
 }
@@ -232,11 +267,18 @@ function downloadImage() {
 
 async function init() {
   await document.fonts.ready;
-  const activeSwatch =
-    colorButtons.find((button) => button.classList.contains("is-active")) ||
-    colorButtons[0];
-  if (activeSwatch) {
-    setActiveSwatch(activeSwatch.dataset.color);
+  const activeTextSwatch =
+    textColorButtons.find((button) => button.classList.contains("is-active")) ||
+    textColorButtons[0];
+  if (activeTextSwatch) {
+    setActiveTextColor(activeTextSwatch.dataset.color);
+  }
+
+  const activeBgSwatch =
+    bgColorButtons.find((button) => button.classList.contains("is-active")) ||
+    bgColorButtons[0];
+  if (activeBgSwatch) {
+    setActiveBackground(activeBgSwatch.dataset.color);
   }
   updateStyleFromControls();
   drawCanvas(quoteInput.value);
@@ -296,11 +338,33 @@ underlineToggle.addEventListener("change", () => {
   drawCanvas(quoteInput.value);
 });
 
-colorButtons.forEach((button) => {
+textColorButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    setActiveSwatch(button.dataset.color);
+    setActiveTextColor(button.dataset.color);
     drawCanvas(quoteInput.value);
   });
+});
+
+bgColorButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setActiveBackground(button.dataset.color);
+    drawCanvas(quoteInput.value);
+  });
+});
+
+footerAlignSelect.addEventListener("change", () => {
+  updateStyleFromControls();
+  drawCanvas(quoteInput.value);
+});
+
+footerXRange.addEventListener("input", () => {
+  updateStyleFromControls();
+  drawCanvas(quoteInput.value);
+});
+
+footerYRange.addEventListener("input", () => {
+  updateStyleFromControls();
+  drawCanvas(quoteInput.value);
 });
 
 downloadBtn.addEventListener("click", downloadImage);
